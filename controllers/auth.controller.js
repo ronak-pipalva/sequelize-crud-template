@@ -6,7 +6,7 @@ const register = async (req, res, next) => {
     const dataToCreate = req.body;
     const { email } = dataToCreate;
 
-    const userExists = await Models.user.findOne({ where: { email } });
+    const userExists = await Models.User.findOne({ where: { email } });
     if (userExists) {
       return sendError(res, {}, "User already exists", 400);
     }
@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await Models.user.findOne({ where: { email } });
+    const user = await Models.User.findOne({ where: { email } });
     if (!user) {
       return sendError(res, {}, "User not found", 404);
     }
