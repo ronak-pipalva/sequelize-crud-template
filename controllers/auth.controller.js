@@ -10,7 +10,7 @@ const register = async (req, res, next) => {
     if (userExists) {
       return sendError(res, {}, "User already exists", 400);
     }
-    const user = await Models.user.create(dataToCreate);
+    const user = await Models.User.create(dataToCreate);
     return sendSuccess(res, user, "User registered successfully", 201);
   } catch (err) {
     next(err);
