@@ -1,48 +1,25 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
 import Sequelize from "sequelize";
-import configFile from "../config/config.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || "development";
-const config = configFile[env];
-const db = {};
+import dotenv from "dotenv";
+import UserToken from "./userToken.model.js";
+import User from "./user.model.js";
+dotenv.config();
 
 const sequelize = new Sequelize(
-  config?.database,
-  config?.username,
-  config?.password,
+  process.env.DB_NAME,
+  process.env.DB_USERNAME,
+  process.env.DB_PASSWORD,
   {
-    host: config?.host,
-    dialect: config?.dialect,
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
     logging: false,
   }
 );
 
-// Read and import all model files
-const modelFiles = fs
-  .readdirSync(__dirname)
-  .filter(
-    (file) =>
-      file.indexOf(".") !== 0 &&
-      file !== basename &&
-      file.slice(-3) === ".js" &&
-      file.indexOf(".test.js") === -1
-  );
-
-// Use Promise.all with dynamic import
-await Promise.all(
-  modelFiles.map(async (file) => {
-    const modelModule = await import(
-      pathToFileURL(path.join(__dirname, file)).href
-    );
-    const model = modelModule.default(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  })
-);
+// Initialize models
+const db = {
+  User: User(sequelize, Sequelize.DataTypes),
+  UserToken: UserToken(sequelize, Sequelize.DataTypes),
+};
 
 // Apply associations
 Object.keys(db).forEach((modelName) => {

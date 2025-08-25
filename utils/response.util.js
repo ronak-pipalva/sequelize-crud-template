@@ -1,11 +1,4 @@
-import STATUS_CODE from "../constants/statusCode.constant.js";
-
-const sendSuccess = (
-  res,
-  data = {},
-  message = "Success",
-  statusCode = STATUS_CODE.SUCCESS
-) => {
+const sendSuccess = (res, data = {}, message = "Success", statusCode = 200) => {
   return res.status(statusCode).json({
     success: true,
     statusCode,
@@ -18,7 +11,7 @@ const sendError = (
   res,
   error = {},
   message = "Something went wrong",
-  statusCode = STATUS_CODE.INTERNAL_SERVER_ERROR
+  statusCode = 500
 ) => {
   return res.status(statusCode).json({
     success: false,

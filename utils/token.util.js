@@ -14,7 +14,7 @@ const saveToken = async (token, user, expires, type) => {
       token_expiry: expires ? expires.toDate() : new Date(),
     };
 
-    const create_token = await Models.user_token.create(body);
+    const create_token = await Models.UserToken.create(body);
     return create_token;
   } catch (error) {
     throw error;
@@ -88,7 +88,7 @@ const readToken = async (token, token_type) => {
       type: token_type,
     };
 
-    let get_token = await Models.user_token.findOne({ where: query });
+    let get_token = await Models.UserToken.findOne({ where: query });
 
     if (!get_token) {
       throw new ApiError(401, "Invalid Token");
@@ -110,7 +110,7 @@ const refreshToken = async (refresh_token) => {
 
     let user_id = token.data.sub;
 
-    const find_user = await Models.user.findOne({
+    const find_user = await Models.User.findOne({
       where: {
         id: user_id,
       },

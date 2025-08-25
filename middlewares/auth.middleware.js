@@ -1,28 +1,40 @@
-import passport from "passport";
-import { sendError } from "../utils/response.util.js";
+import jwt from "jsonwebtoken";
+import ApiError from "../utils/apiError.util.js";
+import appConstant from "../constants/app.constant.js";
 
-const verifyUser = (req, resolve, reject) => async (err, user, info) => {
-  if (err || info || !user) {
-    return reject("Unauthorized user");
-  }
-  req.user = user;
-  resolve();
-};
-
-export const Auth = () => async (req, res, next) => {
+const authenticate = (req, res, next) => {
   try {
-    return new Promise((resolve, reject) => {
-      passport.authenticate(
-        "user_auth",
-        { session: false },
-        verifyUser(req, resolve, reject)
-      )(req, res, next);
-    })
-      .then(() => next())
-      .catch((err) => {
-        return sendError(res, {}, "Unauthorized", 401);
-      });
-  } catch (error) {
-    next(error);
+    const authHeader = req.headers["authorization"];
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new ApiError(401, "Authorization token is required.");
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      throw new ApiError(401, "Authorization token is required.");
+    }
+
+    const decoded = jwt.verify(token, appConstant.JWT.JWT_SECRET);
+
+    if (!decoded || !decoded.id) {
+      throw new ApiError(401, "Invalid token.");
+    }
+
+    // Attach user to request
+    req.user = decoded;
+
+    next();
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      new ApiError(401, "Token has expired.");
+    } else if (err.name === "JsonWebTokenError") {
+      new ApiError(401, "Invalid token.");
+    } else {
+      next(err);
+    }
   }
 };
+
+export default authenticate;
